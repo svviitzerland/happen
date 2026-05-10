@@ -68,7 +68,7 @@ impl HappenEngine {
         app.add_plugin(happen_ai::AiPlugin::default());
         app.add_plugin(RenderPlugin);
 
-        let spawn_point = blueprint.spawn_point;
+        let _spawn_point = blueprint.spawn_point;
 
         let mut mgr = WorldManager::new();
         mgr.load_blueprint(blueprint);
@@ -119,18 +119,23 @@ impl HappenEngine {
                             .insert_component(entity, MeshRenderer::new(mesh_handle, mat_handle));
                     }
 
-                    let look_target = Vec3::ZERO;
-                    let look_dir = (look_target - spawn_point).normalize_or_zero();
-                    let cam_rotation = if look_dir.length_squared() > 0.001 {
-                        Quat::from_rotation_arc(-Vec3::Z, look_dir)
+                    let center = if blueprints.is_empty() {
+                        Vec3::ZERO
                     } else {
-                        Quat::IDENTITY
+                        let sum: Vec3 = blueprints
+                            .iter()
+                            .map(|bp| bp.transform.position)
+                            .fold(Vec3::ZERO, |a, b| a + b);
+                        sum / blueprints.len() as f32
                     };
+
+                    let cam_pos = center + Vec3::new(0.0, 40.0, 100.0);
+                    let cam_rotation = look_at_quat(cam_pos, center);
 
                     let cam_entity = app.world.spawn_empty();
                     app.world.insert_component(
                         cam_entity,
-                        Transform::from_position_rotation(spawn_point, cam_rotation),
+                        Transform::from_position_rotation(cam_pos, cam_rotation),
                     );
                     app.world.insert_component(
                         cam_entity,
@@ -146,9 +151,10 @@ impl HappenEngine {
                     app.world.insert_resource(material_assets);
 
                     log::info!(
-                        "Loaded {} entities, camera at {:?}",
+                        "Loaded {} entities, camera at {:?} looking at {:?}",
                         blueprints.len(),
-                        spawn_point
+                        cam_pos,
+                        center
                     );
                 }),
             );
@@ -156,4 +162,23 @@ impl HappenEngine {
 
         app
     }
+}
+
+fn look_at_quat(eye: Vec3, target: Vec3) -> Quat {
+    let forward = (target - eye).normalize_or_zero();
+    if forward.length_squared() < 0.001 {
+        return Quat::IDENTITY;
+    }
+
+    let right = Vec3::Y.cross(forward).normalize_or_zero();
+    if right.length_squared() < 0.001 {
+        return Quat::from_rotation_x(if forward.y > 0.0 {
+            -std::f32::consts::FRAC_PI_2
+        } else {
+            std::f32::consts::FRAC_PI_2
+        });
+    }
+
+    let up = forward.cross(right);
+    Quat::from_mat3(&happen_math::Mat3::from_cols(right, up, -forward))
 }
