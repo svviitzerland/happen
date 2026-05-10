@@ -1,0 +1,10 @@
+[package]
+name = "happen-core"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+parking_lot.workspace = true
+log.workspace = true

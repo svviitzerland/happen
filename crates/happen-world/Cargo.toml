@@ -1,0 +1,14 @@
+[package]
+name = "happen-world"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+happen-math.workspace = true
+happen-core.workspace = true
+happen-physics.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+noise.workspace = true
+rand.workspace = true
+log.workspace = true

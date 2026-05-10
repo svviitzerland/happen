@@ -1,0 +1,43 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/happen-math",
+    "crates/happen-core",
+    "crates/happen-physics",
+    "crates/happen-render",
+    "crates/happen-world",
+    "crates/happen-ai",
+    "crates/happen-engine",
+    "happen-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Happen Engine Contributors"]
+
+[workspace.dependencies]
+glam = { version = "0.29", features = ["serde", "bytemuck"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+wgpu = "23.0"
+winit = "0.30"
+bytemuck = { version = "1.21", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", features = ["json"] }
+parking_lot = "0.12"
+log = "0.4"
+env_logger = "0.11"
+clap = { version = "4", features = ["derive"] }
+pollster = "0.4"
+noise = "0.9"
+rand = "0.8"
+
+happen-math = { path = "crates/happen-math" }
+happen-core = { path = "crates/happen-core" }
+happen-physics = { path = "crates/happen-physics" }
+happen-render = { path = "crates/happen-render" }
+happen-world = { path = "crates/happen-world" }
+happen-ai = { path = "crates/happen-ai" }
+happen-engine = { path = "crates/happen-engine" }

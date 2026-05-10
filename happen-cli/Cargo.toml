@@ -1,0 +1,20 @@
+[package]
+name = "happen-cli"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "happen"
+path = "src/main.rs"
+
+[dependencies]
+happen-engine.workspace = true
+happen-core.workspace = true
+happen-math.workspace = true
+happen-world.workspace = true
+happen-ai.workspace = true
+clap.workspace = true
+tokio.workspace = true
+serde_json.workspace = true
+log.workspace = true
+env_logger.workspace = true

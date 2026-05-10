@@ -1,0 +1,16 @@
+[package]
+name = "happen-engine"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+happen-math.workspace = true
+happen-core.workspace = true
+happen-physics.workspace = true
+happen-render.workspace = true
+happen-world.workspace = true
+happen-ai.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+log.workspace = true
+env_logger.workspace = true
