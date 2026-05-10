@@ -1,5 +1,6 @@
 use happen_core::World;
 use happen_physics::{Collider, PhysicsContext, RigidBody};
+use happen_render::MeshRenderer;
 use happen_world::{EntityBlueprint, WorldBlueprint};
 
 pub struct BlueprintApplicator;
@@ -18,6 +19,32 @@ impl BlueprintApplicator {
 
         log::info!(
             "Applied blueprint '{}': {} zones, {} entities",
+            blueprint.name,
+            blueprint.zones.len(),
+            blueprint.entities.len()
+        );
+    }
+
+    pub fn apply_with_rendering(
+        world: &mut World,
+        blueprint: &WorldBlueprint,
+        upload_material: &dyn Fn(&happen_math::Color, f32, f32) -> usize,
+    ) {
+        for zone in &blueprint.zones {
+            if let Some(ctx) = world.get_resource_mut::<PhysicsContext>() {
+                ctx.add_zone(zone.to_physics_zone());
+            }
+        }
+
+        for bp in &blueprint.entities {
+            let entity = Self::spawn_entity(world, bp);
+            let mesh_handle = Self::mesh_type_to_handle(&bp.mesh_type);
+            let material_handle = upload_material(&bp.color, bp.metallic, bp.roughness);
+            world.insert_component(entity, MeshRenderer::new(mesh_handle, material_handle));
+        }
+
+        log::info!(
+            "Applied blueprint '{}' with rendering: {} zones, {} entities",
             blueprint.name,
             blueprint.zones.len(),
             blueprint.entities.len()
@@ -57,35 +84,13 @@ impl BlueprintApplicator {
 
         entity
     }
-}
 
-pub fn mesh_type_to_handle(mesh_type: &str) -> usize {
-    match mesh_type {
-        "cube" => 0,
-        "sphere" => 1,
-        "plane" => 2,
-        _ => 0,
-    }
-}
-
-pub fn spawn_blueprint_with_rendering(
-    world: &mut World,
-    blueprint: &WorldBlueprint,
-    upload_material: &dyn Fn(&happen_math::Color, f32, f32) -> usize,
-) {
-    for zone in &blueprint.zones {
-        if let Some(ctx) = world.get_resource_mut::<PhysicsContext>() {
-            ctx.add_zone(zone.to_physics_zone());
+    pub fn mesh_type_to_handle(mesh_type: &str) -> usize {
+        match mesh_type {
+            "cube" => 0,
+            "sphere" => 1,
+            "plane" => 2,
+            _ => 0,
         }
-    }
-
-    for bp in &blueprint.entities {
-        let entity = BlueprintApplicator::spawn_entity(world, bp);
-
-        let mesh_handle = mesh_type_to_handle(&bp.mesh_type);
-        let material_handle = upload_material(&bp.color, bp.metallic, bp.roughness);
-
-        use happen_render::MeshRenderer;
-        world.insert_component(entity, MeshRenderer::new(mesh_handle, material_handle));
     }
 }
