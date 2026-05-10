@@ -119,17 +119,25 @@ impl HappenEngine {
                             .insert_component(entity, MeshRenderer::new(mesh_handle, mat_handle));
                     }
 
-                    let center = if blueprints.is_empty() {
-                        Vec3::ZERO
+                    let (center, extent) = if blueprints.is_empty() {
+                        (Vec3::ZERO, 10.0_f32)
                     } else {
-                        let sum: Vec3 = blueprints
-                            .iter()
-                            .map(|bp| bp.transform.position)
-                            .fold(Vec3::ZERO, |a, b| a + b);
-                        sum / blueprints.len() as f32
+                        let mut min = Vec3::splat(f32::MAX);
+                        let mut max = Vec3::splat(f32::MIN);
+                        for bp in &blueprints {
+                            let p = bp.transform.position;
+                            let s = bp.scale;
+                            min = min.min(p - s);
+                            max = max.max(p + s);
+                        }
+                        let c = (min + max) * 0.5;
+                        let e = (max - min).length() * 0.5;
+                        (c, e.max(10.0))
                     };
 
-                    let cam_pos = center + Vec3::new(0.0, 40.0, 100.0);
+                    let fov = 60.0_f32.to_radians();
+                    let dist = extent / (fov * 0.5).tan() * 1.2;
+                    let cam_pos = center + Vec3::new(dist * 0.3, dist * 0.4, dist);
                     let cam_rotation = look_at_quat(cam_pos, center);
 
                     let cam_entity = app.world.spawn_empty();
@@ -140,10 +148,10 @@ impl HappenEngine {
                     app.world.insert_component(
                         cam_entity,
                         Camera::new(Projection::perspective(
-                            60.0_f32.to_radians(),
+                            fov,
                             1280.0 / 720.0,
                             0.1,
-                            1000.0,
+                            dist * 5.0,
                         )),
                     );
 
