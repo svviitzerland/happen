@@ -1,0 +1,250 @@
+{
+  "name": "Urban Plaza",
+  "description": "An urban plaza with buildings, corridors, crates, and decorative objects to explore",
+  "zones": [],
+  "spawn_point": [0.0, 1.7, 10.0],
+  "entities": [
+    {
+      "name": "Ground",
+      "transform": { "position": [0.0, 0.0, 0.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "plane",
+      "color": { "r": 0.3, "g": 0.5, "b": 0.2, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.9,
+      "scale": [1.0, 1.0, 1.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.2, "friction": 0.8 },
+      "tags": ["ground"]
+    },
+    {
+      "name": "Central Pillar",
+      "transform": { "position": [0.0, 2.5, 0.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 1.0, "g": 0.0, "b": 0.0, "a": 1.0 },
+      "metallic": 0.1,
+      "roughness": 0.5,
+      "scale": [1.0, 5.0, 1.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.3, "friction": 0.5 },
+      "tags": ["structure"]
+    },
+    {
+      "name": "Central Sphere",
+      "transform": { "position": [0.0, 5.5, 0.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "sphere",
+      "color": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0 },
+      "metallic": 0.8,
+      "roughness": 0.2,
+      "scale": [2.0, 2.0, 2.0],
+      "physics": null,
+      "tags": ["decoration"]
+    },
+    {
+      "name": "Building Right",
+      "transform": { "position": [12.0, 3.0, -5.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.6, "g": 0.6, "b": 0.55, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.8,
+      "scale": [6.0, 6.0, 8.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.2, "friction": 0.6 },
+      "tags": ["building"]
+    },
+    {
+      "name": "Building Right Roof",
+      "transform": { "position": [12.0, 7.0, -5.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.25, "g": 0.25, "b": 0.3, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.7,
+      "scale": [7.0, 1.0, 9.0],
+      "physics": null,
+      "tags": ["building"]
+    },
+    {
+      "name": "Building Left",
+      "transform": { "position": [-10.0, 5.0, -8.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.6, "g": 0.6, "b": 0.55, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.8,
+      "scale": [5.0, 10.0, 5.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.2, "friction": 0.6 },
+      "tags": ["building"]
+    },
+    {
+      "name": "Building Left Roof",
+      "transform": { "position": [-10.0, 11.0, -8.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.25, "g": 0.25, "b": 0.3, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.7,
+      "scale": [6.0, 1.0, 6.0],
+      "physics": null,
+      "tags": ["building"]
+    },
+    {
+      "name": "Corridor Wall Left",
+      "transform": { "position": [4.0, 1.5, 8.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.6, "g": 0.6, "b": 0.55, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.8,
+      "scale": [12.0, 3.0, 0.5],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.2, "friction": 0.6 },
+      "tags": ["structure"]
+    },
+    {
+      "name": "Corridor Wall Right",
+      "transform": { "position": [4.0, 1.5, 14.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.6, "g": 0.6, "b": 0.55, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.8,
+      "scale": [12.0, 3.0, 0.5],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.2, "friction": 0.6 },
+      "tags": ["structure"]
+    },
+    {
+      "name": "Crate 1",
+      "transform": { "position": [6.0, 0.5, 3.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 1.0, "g": 0.5, "b": 0.1, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.7,
+      "scale": [1.0, 1.0, 1.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 5.0, "restitution": 0.3, "friction": 0.7 },
+      "tags": ["prop"]
+    },
+    {
+      "name": "Crate 2",
+      "transform": { "position": [6.5, 1.5, 3.2], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 1.0, "g": 0.5, "b": 0.1, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.7,
+      "scale": [0.8, 0.8, 0.8],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 3.0, "restitution": 0.3, "friction": 0.7 },
+      "tags": ["prop"]
+    },
+    {
+      "name": "Crate 3",
+      "transform": { "position": [7.5, 0.5, 2.5], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 1.0, "g": 0.5, "b": 0.1, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.7,
+      "scale": [1.0, 1.0, 1.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 5.0, "restitution": 0.3, "friction": 0.7 },
+      "tags": ["prop"]
+    },
+    {
+      "name": "Blue Sphere",
+      "transform": { "position": [-5.0, 1.0, 4.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "sphere",
+      "color": { "r": 0.0, "g": 0.0, "b": 1.0, "a": 1.0 },
+      "metallic": 0.5,
+      "roughness": 0.3,
+      "scale": [2.0, 2.0, 2.0],
+      "physics": null,
+      "tags": ["decoration"]
+    },
+    {
+      "name": "Cyan Sphere",
+      "transform": { "position": [-3.0, 0.6, 6.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "sphere",
+      "color": { "r": 0.1, "g": 0.8, "b": 0.9, "a": 1.0 },
+      "metallic": 0.6,
+      "roughness": 0.2,
+      "scale": [1.2, 1.2, 1.2],
+      "physics": null,
+      "tags": ["decoration"]
+    },
+    {
+      "name": "Yellow Marker",
+      "transform": { "position": [0.0, 0.3, 11.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "sphere",
+      "color": { "r": 1.0, "g": 1.0, "b": 0.0, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.5,
+      "scale": [0.6, 0.6, 0.6],
+      "physics": null,
+      "tags": ["decoration"]
+    },
+    {
+      "name": "Purple Tower",
+      "transform": { "position": [-20.0, 4.0, -20.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.6, "g": 0.2, "b": 0.8, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.5,
+      "scale": [3.0, 8.0, 3.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.2, "friction": 0.5 },
+      "tags": ["structure"]
+    },
+    {
+      "name": "Purple Tower Top",
+      "transform": { "position": [-20.0, 9.0, -20.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "sphere",
+      "color": { "r": 0.6, "g": 0.2, "b": 0.8, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.5,
+      "scale": [4.0, 4.0, 4.0],
+      "physics": null,
+      "tags": ["decoration"]
+    },
+    {
+      "name": "Stair 1",
+      "transform": { "position": [20.0, 0.2, -2.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.25, "g": 0.25, "b": 0.3, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.7,
+      "scale": [3.0, 0.4, 1.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.1, "friction": 0.9 },
+      "tags": ["structure"]
+    },
+    {
+      "name": "Stair 2",
+      "transform": { "position": [20.0, 0.6, -3.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.25, "g": 0.25, "b": 0.3, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.7,
+      "scale": [3.0, 0.4, 1.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.1, "friction": 0.9 },
+      "tags": ["structure"]
+    },
+    {
+      "name": "Stair 3",
+      "transform": { "position": [20.0, 1.0, -4.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.25, "g": 0.25, "b": 0.3, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.7,
+      "scale": [3.0, 0.4, 1.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.1, "friction": 0.9 },
+      "tags": ["structure"]
+    },
+    {
+      "name": "Stair 4",
+      "transform": { "position": [20.0, 1.4, -5.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.25, "g": 0.25, "b": 0.3, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.7,
+      "scale": [3.0, 0.4, 1.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.1, "friction": 0.9 },
+      "tags": ["structure"]
+    },
+    {
+      "name": "Stair 5",
+      "transform": { "position": [20.0, 1.8, -6.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.25, "g": 0.25, "b": 0.3, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.7,
+      "scale": [3.0, 0.4, 1.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.1, "friction": 0.9 },
+      "tags": ["structure"]
+    }
+  ]
+}

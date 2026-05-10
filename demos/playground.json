@@ -1,0 +1,173 @@
+{
+  "name": "Playground",
+  "description": "Open playground with ramps, platforms, towers, and obstacles for movement testing",
+  "zones": [],
+  "spawn_point": [0.0, 1.7, 0.0],
+  "entities": [
+    {
+      "name": "Ground",
+      "transform": { "position": [0.0, 0.0, 0.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "plane",
+      "color": { "r": 0.4, "g": 0.4, "b": 0.35, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.9,
+      "scale": [1.0, 1.0, 1.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.2, "friction": 0.8 },
+      "tags": ["ground"]
+    },
+    {
+      "name": "Ramp Low",
+      "transform": { "position": [8.0, 0.5, 0.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.8, "g": 0.6, "b": 0.2, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.7,
+      "scale": [4.0, 1.0, 6.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.1, "friction": 0.9 },
+      "tags": ["platform"]
+    },
+    {
+      "name": "Platform Mid",
+      "transform": { "position": [8.0, 2.0, -8.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.8, "g": 0.6, "b": 0.2, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.7,
+      "scale": [6.0, 0.5, 6.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.1, "friction": 0.9 },
+      "tags": ["platform"]
+    },
+    {
+      "name": "Platform High",
+      "transform": { "position": [8.0, 4.0, -16.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.8, "g": 0.6, "b": 0.2, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.7,
+      "scale": [6.0, 0.5, 6.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.1, "friction": 0.9 },
+      "tags": ["platform"]
+    },
+    {
+      "name": "Tower A",
+      "transform": { "position": [-15.0, 6.0, -15.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.2, "g": 0.3, "b": 0.7, "a": 1.0 },
+      "metallic": 0.3,
+      "roughness": 0.4,
+      "scale": [2.0, 12.0, 2.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.2, "friction": 0.5 },
+      "tags": ["tower"]
+    },
+    {
+      "name": "Tower A Top",
+      "transform": { "position": [-15.0, 13.0, -15.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "sphere",
+      "color": { "r": 0.2, "g": 0.5, "b": 1.0, "a": 1.0 },
+      "metallic": 0.7,
+      "roughness": 0.2,
+      "scale": [3.0, 3.0, 3.0],
+      "physics": null,
+      "tags": ["decoration"]
+    },
+    {
+      "name": "Tower B",
+      "transform": { "position": [15.0, 4.0, 15.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.7, "g": 0.2, "b": 0.2, "a": 1.0 },
+      "metallic": 0.3,
+      "roughness": 0.4,
+      "scale": [3.0, 8.0, 3.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.2, "friction": 0.5 },
+      "tags": ["tower"]
+    },
+    {
+      "name": "Tower B Top",
+      "transform": { "position": [15.0, 9.0, 15.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "sphere",
+      "color": { "r": 1.0, "g": 0.3, "b": 0.3, "a": 1.0 },
+      "metallic": 0.7,
+      "roughness": 0.2,
+      "scale": [4.0, 4.0, 4.0],
+      "physics": null,
+      "tags": ["decoration"]
+    },
+    {
+      "name": "Obstacle Wall 1",
+      "transform": { "position": [-5.0, 1.0, -5.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.5, "g": 0.5, "b": 0.5, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.8,
+      "scale": [8.0, 2.0, 0.5],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.2, "friction": 0.6 },
+      "tags": ["obstacle"]
+    },
+    {
+      "name": "Obstacle Wall 2",
+      "transform": { "position": [5.0, 1.0, 8.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.5, "g": 0.5, "b": 0.5, "a": 1.0 },
+      "metallic": 0.0,
+      "roughness": 0.8,
+      "scale": [0.5, 2.0, 10.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.2, "friction": 0.6 },
+      "tags": ["obstacle"]
+    },
+    {
+      "name": "Pillar 1",
+      "transform": { "position": [-8.0, 1.5, 5.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.9, "g": 0.9, "b": 0.8, "a": 1.0 },
+      "metallic": 0.5,
+      "roughness": 0.3,
+      "scale": [1.0, 3.0, 1.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.2, "friction": 0.5 },
+      "tags": ["prop"]
+    },
+    {
+      "name": "Pillar 2",
+      "transform": { "position": [-12.0, 1.5, 5.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.9, "g": 0.9, "b": 0.8, "a": 1.0 },
+      "metallic": 0.5,
+      "roughness": 0.3,
+      "scale": [1.0, 3.0, 1.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.2, "friction": 0.5 },
+      "tags": ["prop"]
+    },
+    {
+      "name": "Pillar 3",
+      "transform": { "position": [-8.0, 1.5, 10.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "cube",
+      "color": { "r": 0.9, "g": 0.9, "b": 0.8, "a": 1.0 },
+      "metallic": 0.5,
+      "roughness": 0.3,
+      "scale": [1.0, 3.0, 1.0],
+      "physics": { "body_type": "static", "collider_shape": "box", "mass": 0.0, "restitution": 0.2, "friction": 0.5 },
+      "tags": ["prop"]
+    },
+    {
+      "name": "Green Orb",
+      "transform": { "position": [0.0, 1.0, -10.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "sphere",
+      "color": { "r": 0.1, "g": 0.9, "b": 0.2, "a": 1.0 },
+      "metallic": 0.8,
+      "roughness": 0.1,
+      "scale": [2.0, 2.0, 2.0],
+      "physics": null,
+      "tags": ["decoration"]
+    },
+    {
+      "name": "Gold Orb",
+      "transform": { "position": [-10.0, 0.5, 0.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0] },
+      "mesh_type": "sphere",
+      "color": { "r": 1.0, "g": 0.85, "b": 0.0, "a": 1.0 },
+      "metallic": 0.9,
+      "roughness": 0.1,
+      "scale": [1.0, 1.0, 1.0],
+      "physics": null,
+      "tags": ["decoration"]
+    }
+  ]
+}

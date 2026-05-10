@@ -1,6 +1,5 @@
 use clap::{Parser, Subcommand};
 use happen_engine::prelude::*;
-use happen_engine::{happen_physics, happen_render, happen_core};
 
 #[derive(Parser)]
 #[command(name = "happen")]
@@ -13,8 +12,11 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Run the engine with a demo scene
-    Demo,
+    /// Run a demo scene (or list available demos)
+    Demo {
+        /// Demo name (e.g. plaza, playground). Omit to list all.
+        name: Option<String>,
+    },
 
     /// Load and run a world from a blueprint JSON file
     Blueprint {
@@ -58,7 +60,7 @@ fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Demo => run_demo(),
+        Commands::Demo { name } => run_demo(name),
         Commands::Blueprint { file } => run_blueprint(&file),
         Commands::Generate { prompt, output, provider, model } => {
             generate_world(&prompt, output, &provider, model)
@@ -68,255 +70,84 @@ fn main() {
     }
 }
 
-fn run_demo() {
+fn run_demo(name: Option<String>) {
+    let demos_dir = find_demos_dir();
+
+    let name = match name {
+        Some(n) => n,
+        None => {
+            list_demos(&demos_dir);
+            return;
+        }
+    };
+
+    let path = demos_dir.join(format!("{}.json", name));
+    if !path.exists() {
+        eprintln!("Demo '{}' not found.", name);
+        eprintln!();
+        list_demos(&demos_dir);
+        std::process::exit(1);
+    }
+
+    run_blueprint(path.to_str().unwrap());
+}
+
+fn find_demos_dir() -> std::path::PathBuf {
+    let candidates = [
+        std::path::PathBuf::from("demos"),
+        std::env::current_exe()
+            .ok()
+            .and_then(|p| p.parent().map(|p| p.join("../../demos")))
+            .unwrap_or_default(),
+    ];
+    for c in &candidates {
+        if c.is_dir() {
+            return c.clone();
+        }
+    }
+    std::path::PathBuf::from("demos")
+}
+
+fn list_demos(demos_dir: &std::path::Path) {
     println!("Happen Engine v{}", env!("CARGO_PKG_VERSION"));
-    println!("Starting playable demo...");
-    println!();
-    println!("  Controls:");
-    println!("    Click     - Lock mouse / enable controls");
-    println!("    WASD      - Move");
-    println!("    Mouse     - Look around");
-    println!("    Space     - Jump");
-    println!("    Shift     - Sprint");
-    println!("    Escape    - Release mouse");
     println!();
 
-    let mut app = happen_core::App::new();
-    app.add_plugin(happen_physics::PhysicsPlugin);
-    app.add_plugin(happen_world::WorldPlugin);
-    app.add_plugin(happen_render::RenderPlugin);
+    if !demos_dir.is_dir() {
+        println!("No demos/ directory found.");
+        println!("Create demos/ with .json blueprint files to add demos.");
+        return;
+    }
 
-    app.set_runner(|app| {
-        happen_render::run_with_init(
-            app,
-            Box::new(|gpu, render_state, app| {
-                use happen_render::*;
-
-                let mut mesh_assets = MeshAssets::new();
-                let mut material_assets = MaterialAssets::new();
-
-                let cube = Mesh::cube(1.0);
-                let cube_h = mesh_assets.upload(&gpu.device, &cube);
-
-                let sphere = Mesh::sphere(0.5, 32, 16);
-                let sphere_h = mesh_assets.upload(&gpu.device, &sphere);
-
-                let plane = Mesh::plane(200.0, 200.0);
-                let plane_h = mesh_assets.upload(&gpu.device, &plane);
-
-                use happen_math::Color;
-                let layout = &render_state.material_bind_group_layout;
-                let dev = &gpu.device;
-
-                let ground_h = material_assets.upload(dev, layout, &Material::new(Color::new(0.3, 0.5, 0.2, 1.0)));
-                let wall_h = material_assets.upload(dev, layout, &Material::new(Color::new(0.6, 0.6, 0.55, 1.0)));
-                let red_h = material_assets.upload(dev, layout, &Material::new(Color::RED));
-                let blue_h = material_assets.upload(dev, layout, &Material::metallic(Color::BLUE, 0.5, 0.3));
-                let yellow_h = material_assets.upload(dev, layout, &Material::new(Color::YELLOW));
-                let orange_h = material_assets.upload(dev, layout, &Material::new(Color::new(1.0, 0.5, 0.1, 1.0)));
-                let white_h = material_assets.upload(dev, layout, &Material::metallic(Color::WHITE, 0.8, 0.2));
-                let dark_h = material_assets.upload(dev, layout, &Material::new(Color::new(0.25, 0.25, 0.3, 1.0)));
-                let cyan_h = material_assets.upload(dev, layout, &Material::metallic(Color::new(0.1, 0.8, 0.9, 1.0), 0.6, 0.2));
-                let purple_h = material_assets.upload(dev, layout, &Material::new(Color::new(0.6, 0.2, 0.8, 1.0)));
-
-                app.world.insert_resource(mesh_assets);
-                app.world.insert_resource(material_assets);
-
-                let spawn_obj =
-                    |world: &mut happen_core::World,
-                     pos: Vec3,
-                     scale: Vec3,
-                     mesh: MeshHandle,
-                     mat: MaterialHandle| {
-                        let e = world.spawn_empty();
-                        world.insert_component(
-                            e,
-                            Transform {
-                                position: pos,
-                                scale,
-                                ..Transform::IDENTITY
-                            },
-                        );
-                        world.insert_component(e, MeshRenderer::new(mesh, mat));
-                    };
-
-                // Ground
-                spawn_obj(
-                    &mut app.world,
-                    Vec3::ZERO,
-                    Vec3::ONE,
-                    plane_h,
-                    ground_h,
-                );
-
-                // === Central plaza ===
-                // Red pillar
-                spawn_obj(
-                    &mut app.world,
-                    Vec3::new(0.0, 2.5, 0.0),
-                    Vec3::new(1.0, 5.0, 1.0),
-                    cube_h,
-                    red_h,
-                );
-                // Metallic sphere on top
-                spawn_obj(
-                    &mut app.world,
-                    Vec3::new(0.0, 5.5, 0.0),
-                    Vec3::splat(2.0),
-                    sphere_h,
-                    white_h,
-                );
-
-                // === Building 1 (right side) ===
-                spawn_obj(
-                    &mut app.world,
-                    Vec3::new(12.0, 3.0, -5.0),
-                    Vec3::new(6.0, 6.0, 8.0),
-                    cube_h,
-                    wall_h,
-                );
-                spawn_obj(
-                    &mut app.world,
-                    Vec3::new(12.0, 7.0, -5.0),
-                    Vec3::new(7.0, 1.0, 9.0),
-                    cube_h,
-                    dark_h,
-                );
-
-                // === Building 2 (left side, tall) ===
-                spawn_obj(
-                    &mut app.world,
-                    Vec3::new(-10.0, 5.0, -8.0),
-                    Vec3::new(5.0, 10.0, 5.0),
-                    cube_h,
-                    wall_h,
-                );
-                spawn_obj(
-                    &mut app.world,
-                    Vec3::new(-10.0, 11.0, -8.0),
-                    Vec3::new(6.0, 1.0, 6.0),
-                    cube_h,
-                    dark_h,
-                );
-
-                // === Corridor walls ===
-                spawn_obj(
-                    &mut app.world,
-                    Vec3::new(4.0, 1.5, 8.0),
-                    Vec3::new(12.0, 3.0, 0.5),
-                    cube_h,
-                    wall_h,
-                );
-                spawn_obj(
-                    &mut app.world,
-                    Vec3::new(4.0, 1.5, 14.0),
-                    Vec3::new(12.0, 3.0, 0.5),
-                    cube_h,
-                    wall_h,
-                );
-
-                // === Scattered objects ===
-                // Orange crates
-                spawn_obj(
-                    &mut app.world,
-                    Vec3::new(6.0, 0.5, 3.0),
-                    Vec3::splat(1.0),
-                    cube_h,
-                    orange_h,
-                );
-                spawn_obj(
-                    &mut app.world,
-                    Vec3::new(6.5, 1.5, 3.2),
-                    Vec3::splat(0.8),
-                    cube_h,
-                    orange_h,
-                );
-                spawn_obj(
-                    &mut app.world,
-                    Vec3::new(7.5, 0.5, 2.5),
-                    Vec3::splat(1.0),
-                    cube_h,
-                    orange_h,
-                );
-
-                // Blue spheres
-                spawn_obj(
-                    &mut app.world,
-                    Vec3::new(-5.0, 1.0, 4.0),
-                    Vec3::splat(2.0),
-                    sphere_h,
-                    blue_h,
-                );
-                spawn_obj(
-                    &mut app.world,
-                    Vec3::new(-3.0, 0.6, 6.0),
-                    Vec3::splat(1.2),
-                    sphere_h,
-                    cyan_h,
-                );
-
-                // Yellow marker
-                spawn_obj(
-                    &mut app.world,
-                    Vec3::new(0.0, 0.3, 11.0),
-                    Vec3::new(0.6, 0.6, 0.6),
-                    sphere_h,
-                    yellow_h,
-                );
-
-                // Purple tower far away
-                spawn_obj(
-                    &mut app.world,
-                    Vec3::new(-20.0, 4.0, -20.0),
-                    Vec3::new(3.0, 8.0, 3.0),
-                    cube_h,
-                    purple_h,
-                );
-                spawn_obj(
-                    &mut app.world,
-                    Vec3::new(-20.0, 9.0, -20.0),
-                    Vec3::splat(4.0),
-                    sphere_h,
-                    purple_h,
-                );
-
-                // === Ramp / stairs (stacked cubes) ===
-                for i in 0..5 {
-                    let y = i as f32 * 0.4 + 0.2;
-                    let z = -2.0 - i as f32 * 1.0;
-                    spawn_obj(
-                        &mut app.world,
-                        Vec3::new(20.0, y, z),
-                        Vec3::new(3.0, 0.4, 1.0),
-                        cube_h,
-                        dark_h,
-                    );
+    let mut demos: Vec<(String, String, usize)> = Vec::new();
+    if let Ok(entries) = std::fs::read_dir(demos_dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.extension().map(|e| e == "json").unwrap_or(false) {
+                let name = path.file_stem().unwrap().to_string_lossy().to_string();
+                if let Ok(contents) = std::fs::read_to_string(&path) {
+                    if let Ok(bp) = serde_json::from_str::<WorldBlueprint>(&contents) {
+                        demos.push((name, bp.description, bp.entities.len()));
+                    }
                 }
+            }
+        }
+    }
 
-                // === FPS Camera / Player ===
-                let player = app.world.spawn_empty();
-                app.world.insert_component(
-                    player,
-                    Transform::from_position(Vec3::new(0.0, 1.7, 10.0)),
-                );
-                app.world.insert_component(
-                    player,
-                    Camera::new(Projection::perspective(
-                        70.0_f32.to_radians(),
-                        1280.0 / 720.0,
-                        0.1,
-                        500.0,
-                    )),
-                );
-                app.world
-                    .insert_component(player, FpsController::default());
+    demos.sort_by(|a, b| a.0.cmp(&b.0));
 
-                println!("Loaded playable demo: {} entities", app.world.all_entities().len());
-            }),
-        );
-    });
-
-    app.run();
+    if demos.is_empty() {
+        println!("No demos found in {}", demos_dir.display());
+        println!("Add .json blueprint files to create demos.");
+    } else {
+        println!("Available demos:");
+        println!();
+        for (name, desc, count) in &demos {
+            println!("  {:<16} {} ({} entities)", name, desc, count);
+        }
+        println!();
+        println!("Run with: happen demo <name>");
+        println!("Example:  happen demo plaza");
+    }
 }
 
 fn run_blueprint(path: &str) {
@@ -336,9 +167,18 @@ fn run_blueprint(path: &str) {
         }
     };
 
-    println!("Happen Engine - Loading '{}'", blueprint.name);
-    println!("  Zones: {}", blueprint.zones.len());
-    println!("  Entities: {}", blueprint.entities.len());
+    println!("Happen Engine - '{}'", blueprint.name);
+    println!("  {}", blueprint.description);
+    println!("  Zones: {}  Entities: {}", blueprint.zones.len(), blueprint.entities.len());
+    println!();
+    println!("  Controls:");
+    println!("    Click     - Lock mouse / enable controls");
+    println!("    WASD      - Move");
+    println!("    Mouse     - Look around");
+    println!("    Space     - Jump");
+    println!("    Shift     - Sprint");
+    println!("    Escape    - Release mouse");
+    println!();
 
     let app = HappenEngine::from_blueprint(blueprint);
     app.run();

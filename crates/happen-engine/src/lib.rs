@@ -135,34 +135,39 @@ impl HappenEngine {
                         (c, e.max(10.0))
                     };
 
-                    let fov = 60.0_f32.to_radians();
-                    let dist = extent / (fov * 0.5).tan() * 1.2;
-                    let cam_pos = center + Vec3::new(dist * 0.3, dist * 0.4, dist);
+                    let spawn_point = app
+                        .world
+                        .get_resource::<WorldManager>()
+                        .and_then(|mgr| mgr.blueprint.as_ref().map(|bp| bp.spawn_point))
+                        .unwrap_or(center + Vec3::new(0.0, 1.7, 10.0));
 
-                    let cam_entity = app.world.spawn_empty();
+                    let far = extent.max(100.0) * 5.0;
+                    let player = app.world.spawn_empty();
                     app.world.insert_component(
-                        cam_entity,
-                        Transform::from_position(cam_pos),
+                        player,
+                        Transform::from_position(spawn_point),
                     );
                     app.world.insert_component(
-                        cam_entity,
+                        player,
                         Camera::new(Projection::perspective(
-                            fov,
+                            70.0_f32.to_radians(),
                             1280.0 / 720.0,
                             0.1,
-                            dist * 5.0,
-                        ))
-                        .looking_at(center),
+                            far,
+                        )),
+                    );
+                    app.world.insert_component(
+                        player,
+                        happen_render::FpsController::default(),
                     );
 
                     app.world.insert_resource(mesh_assets);
                     app.world.insert_resource(material_assets);
 
                     log::info!(
-                        "Loaded {} entities, camera at {:?} looking at {:?}",
+                        "Loaded {} entities, player at {:?}",
                         blueprints.len(),
-                        cam_pos,
-                        center
+                        spawn_point
                     );
                 }),
             );
