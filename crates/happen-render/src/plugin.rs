@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use happen_core::{App, Plugin};
+use happen_core::App;
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::{ActiveEventLoop, EventLoop};
@@ -11,23 +11,49 @@ use crate::material::MaterialAssets;
 use crate::mesh::MeshAssets;
 use crate::renderer::{GpuContext, RenderState};
 
+pub type InitCallback = Box<dyn FnOnce(&GpuContext, &RenderState, &mut happen_core::App)>;
+
 pub struct RenderPlugin;
 
-impl Plugin for RenderPlugin {
-    fn build(&self, app: &mut App) {
-        app.set_runner(winit_runner);
-    }
+impl happen_core::Plugin for RenderPlugin {
+    fn build(&self, _app: &mut App) {}
 
     fn name(&self) -> &str {
         "RenderPlugin"
     }
 }
 
+pub fn default_init_callback() -> InitCallback {
+    Box::new(|gpu, render_state, app| {
+        let mut mesh_assets = MeshAssets::new();
+        let mut material_assets = MaterialAssets::new();
+
+        let cube_mesh = crate::mesh::Mesh::cube(1.0);
+        mesh_assets.upload(&gpu.device, &cube_mesh);
+
+        let sphere_mesh = crate::mesh::Mesh::sphere(0.5, 32, 16);
+        mesh_assets.upload(&gpu.device, &sphere_mesh);
+
+        let plane_mesh = crate::mesh::Mesh::plane(100.0, 100.0);
+        mesh_assets.upload(&gpu.device, &plane_mesh);
+
+        let default_mat = crate::material::Material::default();
+        material_assets.upload(
+            &gpu.device,
+            &render_state.material_bind_group_layout,
+            &default_mat,
+        );
+
+        app.world.insert_resource(mesh_assets);
+        app.world.insert_resource(material_assets);
+    })
+}
+
 struct HappenApp {
     app: Option<happen_core::App>,
     gpu: Option<GpuContext>,
     render_state: Option<RenderState>,
-    init_callback: Option<Box<dyn FnOnce(&GpuContext, &RenderState, &mut happen_core::App)>>,
+    init_callback: Option<InitCallback>,
 }
 
 impl ApplicationHandler for HappenApp {
@@ -113,8 +139,8 @@ impl ApplicationHandler for HappenApp {
     }
 }
 
-fn winit_runner(app: happen_core::App) {
-    env_logger::init();
+pub fn run_with_init(app: happen_core::App, init: InitCallback) {
+    let _ = env_logger::try_init();
 
     let event_loop = EventLoop::new().unwrap();
     event_loop.set_control_flow(winit::event_loop::ControlFlow::Poll);
@@ -123,29 +149,7 @@ fn winit_runner(app: happen_core::App) {
         app: Some(app),
         gpu: None,
         render_state: None,
-        init_callback: Some(Box::new(|gpu, render_state, app| {
-            let mut mesh_assets = MeshAssets::new();
-            let mut material_assets = MaterialAssets::new();
-
-            let cube_mesh = crate::mesh::Mesh::cube(1.0);
-            mesh_assets.upload(&gpu.device, &cube_mesh);
-
-            let sphere_mesh = crate::mesh::Mesh::sphere(0.5, 32, 16);
-            mesh_assets.upload(&gpu.device, &sphere_mesh);
-
-            let plane_mesh = crate::mesh::Mesh::plane(100.0, 100.0);
-            mesh_assets.upload(&gpu.device, &plane_mesh);
-
-            let default_mat = crate::material::Material::default();
-            material_assets.upload(
-                &gpu.device,
-                &render_state.material_bind_group_layout,
-                &default_mat,
-            );
-
-            app.world.insert_resource(mesh_assets);
-            app.world.insert_resource(material_assets);
-        })),
+        init_callback: Some(init),
     };
 
     event_loop.run_app(&mut happen_app).unwrap();
