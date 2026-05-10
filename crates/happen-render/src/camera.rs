@@ -59,6 +59,7 @@ pub struct Camera {
     pub projection: Projection,
     pub clear_color: Color,
     pub active: bool,
+    pub target: Option<Vec3>,
 }
 
 impl Camera {
@@ -67,13 +68,23 @@ impl Camera {
             projection,
             clear_color: Color::CORNFLOWER_BLUE,
             active: true,
+            target: None,
         }
     }
 
-    pub fn view_matrix(position: Vec3, rotation: happen_math::Quat) -> Mat4 {
-        let forward = rotation * -Vec3::Z;
-        let up = rotation * Vec3::Y;
-        Mat4::look_at_rh(position, position + forward, up)
+    pub fn looking_at(mut self, target: Vec3) -> Self {
+        self.target = Some(target);
+        self
+    }
+
+    pub fn view_matrix_for(position: Vec3, rotation: happen_math::Quat, target: Option<Vec3>) -> Mat4 {
+        if let Some(target) = target {
+            Mat4::look_at_rh(position, target, Vec3::Y)
+        } else {
+            let forward = rotation * -Vec3::Z;
+            let up = rotation * Vec3::Y;
+            Mat4::look_at_rh(position, position + forward, up)
+        }
     }
 }
 

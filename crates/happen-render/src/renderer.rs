@@ -298,6 +298,7 @@ impl RenderState {
 
         let mut camera_uniform = CameraUniform::new();
         let mut clear_color = happen_math::Color::CORNFLOWER_BLUE;
+        let mut found_camera = false;
 
         let entities = world.all_entities();
         for &entity in &entities {
@@ -306,13 +307,18 @@ impl RenderState {
                 world.get_component::<Transform>(entity),
             ) {
                 if cam.active {
-                    let view_matrix = Camera::view_matrix(transform.position, transform.rotation);
+                    let view_matrix = Camera::view_matrix_for(transform.position, transform.rotation, cam.target);
                     let proj_matrix = cam.projection.matrix();
                     camera_uniform.update(view_matrix, proj_matrix, transform.position);
                     clear_color = cam.clear_color;
+                    found_camera = true;
                     break;
                 }
             }
+        }
+
+        if !found_camera {
+            log::warn!("No active camera found! {} entities total", entities.len());
         }
 
         gpu.queue.write_buffer(
@@ -361,6 +367,7 @@ impl RenderState {
             let mesh_assets = world.get_resource::<MeshAssets>();
             let material_assets = world.get_resource::<MaterialAssets>();
 
+            let mut draw_count = 0u32;
             if let (Some(meshes), Some(materials)) = (mesh_assets, material_assets) {
                 for &entity in &entities {
                     let (Some(mesh_renderer), Some(transform)) = (
@@ -407,7 +414,17 @@ impl RenderState {
                         wgpu::IndexFormat::Uint32,
                     );
                     render_pass.draw_indexed(0..gpu_mesh.index_count, 0, 0..1);
+                    draw_count += 1;
                 }
+            }
+
+            if draw_count == 0 {
+                log::warn!(
+                    "No draw calls! {} entities, mesh_assets={}, mat_assets={}",
+                    entities.len(),
+                    world.get_resource::<MeshAssets>().is_some(),
+                    world.get_resource::<MaterialAssets>().is_some(),
+                );
             }
         }
 

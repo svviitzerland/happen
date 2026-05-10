@@ -107,7 +107,7 @@ impl Mesh {
             Vertex::new([-hw, 0.0,  hd], [0.0, 1.0, 0.0], [0.0, 1.0], [1.0; 4]),
         ];
 
-        let indices = vec![0, 1, 2, 2, 3, 0];
+        let indices = vec![0, 2, 1, 2, 0, 3];
 
         Self { vertices, indices }
     }
