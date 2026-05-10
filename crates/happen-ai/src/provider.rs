@@ -119,5 +119,89 @@ impl AiProvider for AnthropicProvider {
     }
 }
 
-// Dependency: add async-trait
-// For now the Cargo.toml should include reqwest and tokio
+pub struct OpenRouterProvider {
+    api_key: String,
+    model: String,
+    client: reqwest::Client,
+    base_url: String,
+}
+
+impl OpenRouterProvider {
+    pub fn new(api_key: String, model: String) -> Self {
+        Self {
+            api_key,
+            model,
+            client: reqwest::Client::new(),
+            base_url: "https://openrouter.ai/api/v1/chat/completions".to_string(),
+        }
+    }
+
+    pub fn with_base_url(mut self, url: String) -> Self {
+        self.base_url = url;
+        self
+    }
+
+    pub fn from_config(config: &AiProviderConfig) -> Result<Self, AiError> {
+        let api_key = config
+            .api_key
+            .clone()
+            .or_else(|| std::env::var("OPENROUTER_API_KEY").ok())
+            .ok_or(AiError::NoApiKey)?;
+
+        let mut provider = Self::new(api_key, config.model.clone());
+        if let Some(ref url) = config.base_url {
+            provider.base_url = url.clone();
+        }
+        Ok(provider)
+    }
+}
+
+#[async_trait::async_trait]
+impl AiProvider for OpenRouterProvider {
+    async fn generate(&self, prompt: &str, system_prompt: &str) -> Result<String, AiError> {
+        let body = serde_json::json!({
+            "model": self.model,
+            "max_tokens": 4096,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": system_prompt
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        });
+
+        let response = self
+            .client
+            .post(&self.base_url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .header("HTTP-Referer", "https://github.com/happen-engine")
+            .header("X-Title", "Happen Engine")
+            .header("content-type", "application/json")
+            .json(&body)
+            .send()
+            .await
+            .map_err(|e| AiError::Network(e.to_string()))?;
+
+        let status = response.status();
+        let text = response
+            .text()
+            .await
+            .map_err(|e| AiError::Network(e.to_string()))?;
+
+        if !status.is_success() {
+            return Err(AiError::ApiError(format!("HTTP {}: {}", status, text)));
+        }
+
+        let json: serde_json::Value =
+            serde_json::from_str(&text).map_err(|e| AiError::Parse(e.to_string()))?;
+
+        json["choices"][0]["message"]["content"]
+            .as_str()
+            .map(|s| s.to_string())
+            .ok_or_else(|| AiError::Parse("No content in response".to_string()))
+    }
+}

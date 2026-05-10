@@ -29,6 +29,14 @@ enum Commands {
         /// Save the generated blueprint to a file
         #[arg(short, long)]
         output: Option<String>,
+
+        /// AI provider: anthropic or openrouter
+        #[arg(short, long, default_value = "anthropic")]
+        provider: String,
+
+        /// Model to use (e.g. claude-sonnet-4-6, google/gemini-2.5-flash)
+        #[arg(short, long)]
+        model: Option<String>,
     },
 
     /// Inspect a blueprint file
@@ -51,7 +59,9 @@ fn main() {
     match cli.command {
         Commands::Demo => run_demo(),
         Commands::Blueprint { file } => run_blueprint(&file),
-        Commands::Generate { prompt, output } => generate_world(&prompt, output),
+        Commands::Generate { prompt, output, provider, model } => {
+            generate_world(&prompt, output, &provider, model)
+        }
         Commands::Inspect { file } => inspect_blueprint(&file),
         Commands::New { name } => create_project(&name),
     }
@@ -91,31 +101,51 @@ fn run_blueprint(path: &str) {
     app.run();
 }
 
-fn generate_world(prompt: &str, output: Option<String>) {
+fn generate_world(prompt: &str, output: Option<String>, provider_name: &str, model: Option<String>) {
     println!("Happen Engine - AI World Generator");
+    println!("Provider: {}", provider_name);
     println!("Prompt: \"{}\"", prompt);
 
     let rt = tokio::runtime::Runtime::new().unwrap();
     rt.block_on(async {
-        let config = happen_ai::AiProviderConfig::default();
-        let provider = match happen_ai::AnthropicProvider::from_config(&config) {
-            Ok(p) => p,
-            Err(e) => {
-                eprintln!("Error: {}", e);
-                eprintln!("Set ANTHROPIC_API_KEY environment variable to use AI generation.");
-                eprintln!("\nGenerating demo world instead...");
-
-                let blueprint = WorldBlueprint::simple_demo();
-                if let Some(ref path) = output {
-                    let json = serde_json::to_string_pretty(&blueprint).unwrap();
-                    std::fs::write(path, &json).unwrap();
-                    println!("Saved demo blueprint to: {}", path);
+        let ai_provider: Box<dyn happen_ai::AiProvider> = match provider_name {
+            "openrouter" => {
+                let config = happen_ai::AiProviderConfig {
+                    provider: "openrouter".to_string(),
+                    model: model.unwrap_or_else(|| "anthropic/claude-sonnet-4".to_string()),
+                    api_key: None,
+                    base_url: None,
+                };
+                match happen_ai::OpenRouterProvider::from_config(&config) {
+                    Ok(p) => Box::new(p),
+                    Err(e) => {
+                        eprintln!("Error: {}", e);
+                        eprintln!("Set OPENROUTER_API_KEY environment variable.");
+                        fallback_demo(&output);
+                        return;
+                    }
                 }
-                return;
+            }
+            _ => {
+                let config = happen_ai::AiProviderConfig {
+                    provider: "anthropic".to_string(),
+                    model: model.unwrap_or_else(|| "claude-sonnet-4-6".to_string()),
+                    api_key: None,
+                    base_url: None,
+                };
+                match happen_ai::AnthropicProvider::from_config(&config) {
+                    Ok(p) => Box::new(p),
+                    Err(e) => {
+                        eprintln!("Error: {}", e);
+                        eprintln!("Set ANTHROPIC_API_KEY environment variable.");
+                        fallback_demo(&output);
+                        return;
+                    }
+                }
             }
         };
 
-        let orchestrator = happen_ai::AiOrchestrator::new(Box::new(provider));
+        let orchestrator = happen_ai::AiOrchestrator::new(ai_provider);
         let intent = happen_ai::UserIntent::new(prompt);
 
         println!("Generating world with AI...");
@@ -125,12 +155,11 @@ fn generate_world(prompt: &str, output: Option<String>) {
                 println!("Generated: '{}'", blueprint.name);
                 println!("  {} zones, {} entities", blueprint.zones.len(), blueprint.entities.len());
 
+                let json = serde_json::to_string_pretty(&blueprint).unwrap();
                 if let Some(ref path) = output {
-                    let json = serde_json::to_string_pretty(&blueprint).unwrap();
                     std::fs::write(path, &json).unwrap();
                     println!("Saved to: {}", path);
                 } else {
-                    let json = serde_json::to_string_pretty(&blueprint).unwrap();
                     println!("\n{}", json);
                 }
             }
@@ -140,6 +169,16 @@ fn generate_world(prompt: &str, output: Option<String>) {
             }
         }
     });
+}
+
+fn fallback_demo(output: &Option<String>) {
+    eprintln!("\nGenerating demo world instead...");
+    let blueprint = WorldBlueprint::simple_demo();
+    if let Some(ref path) = output {
+        let json = serde_json::to_string_pretty(&blueprint).unwrap();
+        std::fs::write(path, &json).unwrap();
+        println!("Saved demo blueprint to: {}", path);
+    }
 }
 
 fn inspect_blueprint(path: &str) {

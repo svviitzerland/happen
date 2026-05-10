@@ -2,7 +2,7 @@ mod provider;
 mod orchestrator;
 mod applicator;
 
-pub use provider::{AiProvider, AiProviderConfig, AnthropicProvider};
+pub use provider::{AiProvider, AiProviderConfig, AnthropicProvider, OpenRouterProvider};
 pub use orchestrator::{AiOrchestrator, UserIntent};
 pub use applicator::BlueprintApplicator;
 
